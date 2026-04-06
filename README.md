@@ -98,8 +98,8 @@ The system is designed using a simulated multi-agent architecture:
 ---
 
 ## Live Demo
-Frontend - https://genai-risk-frontend3.onrender.com
-Backend  - https://genai-risk-management-5.onrender.com
+Frontend - (https://genai-risk-management-1-kg15.onrender.com/)
+Backend  - https://genai-risk-management-7ea9.onrender.com
 
 ##  Future Improvements
 
