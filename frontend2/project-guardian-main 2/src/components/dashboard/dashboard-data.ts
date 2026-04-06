@@ -4,6 +4,7 @@ export type PaymentStatus = "paid" | "partial" | "pending" | "blocked";
 export interface Project {
   id: string;
   name: string;
+  description: string;
   delay: number;
   payment: PaymentStatus;
   resources: number;
@@ -13,6 +14,7 @@ export interface Project {
 
 export interface NewProjectInput {
   name: string;
+  description: string;
   delay: number;
   payment: PaymentStatus;
   resources: number;
@@ -61,12 +63,12 @@ export function createProject(id: string, input: NewProjectInput): Project {
 }
 
 export const initialProjects: Project[] = [
-  createProject("PRJ-001", { name: "Neural Engine v3", delay: 72, payment: "blocked", resources: 3 }),
-  createProject("PRJ-002", { name: "Data Pipeline Refactor", delay: 48, payment: "pending", resources: 5 }),
-  createProject("PRJ-003", { name: "Auth Service Migration", delay: 26, payment: "partial", resources: 7 }),
-  createProject("PRJ-004", { name: "ML Model Optimization", delay: 10, payment: "paid", resources: 9 }),
-  createProject("PRJ-005", { name: "Cloud Infra Scaling", delay: 58, payment: "pending", resources: 4 }),
-  createProject("PRJ-006", { name: "API Gateway Redesign", delay: 33, payment: "paid", resources: 6 }),
+  createProject("PRJ-001", { name: "Neural Engine v3", description: "AI model training platform for deep learning workloads.", delay: 72, payment: "blocked", resources: 3 }),
+  createProject("PRJ-002", { name: "Data Pipeline Refactor", description: "ETL pipeline modernisation for real-time analytics.", delay: 48, payment: "pending", resources: 5 }),
+  createProject("PRJ-003", { name: "Auth Service Migration", description: "OAuth 2.0 migration for the enterprise SSO system.", delay: 26, payment: "partial", resources: 7 }),
+  createProject("PRJ-004", { name: "ML Model Optimization", description: "Reducing inference latency for production ML models.", delay: 10, payment: "paid", resources: 9 }),
+  createProject("PRJ-005", { name: "Cloud Infra Scaling", description: "Kubernetes cluster auto-scaling for peak load handling.", delay: 58, payment: "pending", resources: 4 }),
+  createProject("PRJ-006", { name: "API Gateway Redesign", description: "Redesigning the API gateway for higher throughput.", delay: 33, payment: "paid", resources: 6 }),
 ];
 
 export function getHighestRiskProject(projects: Project[]) {
