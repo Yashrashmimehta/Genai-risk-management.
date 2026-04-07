@@ -1,7 +1,15 @@
 import sqlite3
+import os
 
 def connect_db():
-    conn = sqlite3.connect("../data/projects.db")
+    # Make the path relative to this file's directory
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, "..", "data", "projects.db")
+    
+    # Ensure the data directory exists
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    
+    conn = sqlite3.connect(db_path)
     return conn
 
 

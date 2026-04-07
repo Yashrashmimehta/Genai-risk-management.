@@ -1,12 +1,16 @@
+import os
+import io
+import datetime
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
-from database import create_tables, connect_db
+from dotenv import load_dotenv
+
+# Local imports
+from database import create_tables, connect_db, insert_sample_data
 from risk_scoring import calculate_risk
 from chatbot import chatbot_query
 from project_agent import analyze_project
-from database import insert_sample_data
-import io
-import datetime
+from groq_service import get_ai_completion, client as groq_client
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -18,11 +22,30 @@ from reportlab.platypus import (
 )
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Robust CORS configuration
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 create_tables()
 insert_sample_data()
+
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    """Proxy route to call the smart chatbot agent."""
+    data = request.json
+    user_message = data.get("message", "")
+    
+    # Use the smart chatbot agent
+    response = chatbot_query(user_message)
+    
+    # Log for verification
+    if "AI" in response or len(response) > 50:
+         print(f"--- AI Chat response delivered via Groq (Llama-3) ---")
+    
+    return jsonify({"response": response})
 
 # ── Colour palette ────────────────────────────────────────────────────────────
 RISK_COLORS = {
@@ -78,11 +101,48 @@ def _score_factors(delay: int, payment: str, resources: int):
     ], total
 
 
+def _get_ai_recommendations(project_name: str, description: str, risk_level: str, delay: int, payment: str, resources: int):
+    """Helper to get 3 expert steps from Groq."""
+    if not groq_client:
+        return []
+    
+    prompt = (
+        f"You are a Senior Project Risk Consultant. Analyze this project:\n"
+        f"Name: {project_name}\n"
+        f"Description: {description}\n"
+        f"Risk Level: {risk_level}\n"
+        f"Metrics: {delay}d delay, {payment} payment, {resources} resources.\n\n"
+        f"Provide exactly 3 highly specific, professional, and actionable recovery steps. "
+        f"Format each step as a single concise sentence. Do not include introductory text."
+    )
+    try:
+        completion = groq_client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.6,
+            max_tokens=300
+        )
+        content = completion.choices[0].message.content.strip()
+        print(f"--- AI Recommendations generated via Groq (Llama-3) ---")
+        # Clean up lines and return list
+        lines = [line.strip("- ").strip("1. ").strip() for line in content.split("\n") if line.strip()]
+        return lines[:3]
+    except Exception as e:
+        print(f"--- AI recommendation FAILED via Groq: {e} ---")
+        return []
+
 def _mitigation_items(project_name: str, description: str,
                       risk_level: str, delay: int,
                       payment: str, resources: int) -> list[str]:
     """Build a contextual, prioritised list of mitigation recommendations."""
     items = []
+    
+    # ── AI Insights (Try Groq first) ──
+    ai_steps = _get_ai_recommendations(project_name, description, risk_level, delay, payment, resources)
+    if ai_steps:
+        # Highlight AI items
+        for step in ai_steps:
+            items.append(f"AI STRATEGY: {step}")
 
     # ── Schedule ──
     if delay > 30:

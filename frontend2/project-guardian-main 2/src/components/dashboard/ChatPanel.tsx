@@ -283,18 +283,33 @@ export function ChatPanel({ projects }: ChatPanelProps) {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const send = () => {
+  const send = async () => {
     if (!input.trim()) return;
     const currentInput = input;
     setMessages((prev) => [...prev, { role: "user", content: currentInput }]);
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      const response = getResponse(currentInput, projects);
-      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
+      const response = await fetch(`${API_URL}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: currentInput, projects }),
+      });
+
+      if (!response.ok) throw new Error("API failed");
+      const data = await response.json();
+      
+      setMessages((prev) => [...prev, { role: "assistant", content: data.response }]);
+    } catch (err) {
+      console.warn("Groq API failed, falling back to local logic:", err);
+      // Fallback to local rule-based engine
+      const localResponse = getResponse(currentInput, projects);
+      setMessages((prev) => [...prev, { role: "assistant", content: localResponse }]);
+    } finally {
       setIsTyping(false);
-    }, 420);
+    }
   };
 
   const suggestions = [
