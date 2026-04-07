@@ -64,6 +64,27 @@
     --glow-accent: 0 0 20px hsl(36 90% 55% / 0.15);
     --glow-destructive: 0 0 20px hsl(0 72% 55% / 0.15);
   }
+
+  .soothing {
+    --background: 230 60% 98%;
+    --foreground: 222 47% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 12%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 40% 95%;
+    --secondary-foreground: 222 47% 20%;
+    --muted: 230 30% 92%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 0 0% 100%;
+    --border: 230 30% 90%;
+    --input: 230 30% 90%;
+    --ring: 262 83% 58%;
+    --grid-opacity: 0.05;
+  }
 }
 
 @layer base {
@@ -91,8 +112,8 @@
   }
   .grid-pattern {
     background-image: 
-      linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
+      linear-gradient(hsl(var(--border) / var(--grid-opacity, 0.3)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / var(--grid-opacity, 0.3)) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 }
