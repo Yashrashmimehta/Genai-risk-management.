@@ -1,24 +1,21 @@
-import openai
-
-openai.api_key = "YOUR_OPENAI_KEY"
+from groq_service import get_ai_completion
 
 def generate_report(project_name, risk_level, risks):
-
+    """
+    Generate a professional AI project risk report using Groq.
+    """
     prompt = f"""
-    Generate a project risk report.
-
-    Project: {project_name}
-    Risk Level: {risk_level}
-
-    Risks Detected:
-    {risks}
-
-    Suggest mitigation strategies.
+    Generate a professional analysis for this project risk:
+    
+    Project Name: {project_name}
+    Verdict: {risk_level}
+    Risks Identified: {risks}
+    
+    Structure:
+    1. Executive Summary
+    2. Deep Dive Analysis
+    3. Mitigation Checklist (Short, Actionable)
     """
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role":"user","content":prompt}]
-    )
-
-    return response["choices"][0]["message"]["content"]
+    system_message = "You are a Senior Strategic Risk Reporting Agent."
+    return get_ai_completion(prompt, system_message)
